@@ -43,7 +43,7 @@ func NewLocalDriverWithSystemUtilAndInvoker(systemUtil SystemUtil, invoker Invok
 }
 
 func (d *LocalDriver) Create(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
-	logger = logger.Session("create", lager.Data{"request", createRequest})
+	logger = logger.Session("create", lager.Data{"request": createRequest})
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -115,7 +115,7 @@ func (d *LocalDriver) Get(logger lager.Logger, getRequest voldriver.GetRequest) 
 				Mountpoint:    volume.LocalMountPoint,
 			}}
 		}
-		return voldriver.GetResponse{Volume: getRequest.Name}
+		return voldriver.GetResponse{Volume: voldriver.VolumeInfo{Name: getRequest.Name}}
 	}
 	logger.Info("get-nfs-volume-not-found", lager.Data{"volume_name" : getRequest.Name})
 	return voldriver.GetResponse{Err: fmt.Sprintf("Volume %s not found", getRequest.Name)}
@@ -131,10 +131,10 @@ func (d *LocalDriver) Path(logger lager.Logger, getRequest voldriver.PathRequest
 			logger.Info("nfs-volume-path", lager.Data{"volume_name": getRequest.Name, "volume_path": volume.LocalMountPoint})
 			return voldriver.PathResponse{Mountpoint:volume.LocalMountPoint}
 		}
-		logger.Info("nfs-volume-path-not-mounted",lager.Data{"volume_name", getRequest.Name})
+		logger.Info("nfs-volume-path-not-mounted",lager.Data{"volume_name": getRequest.Name})
 		return voldriver.PathResponse{Err: fmt.Sprintf("Volume %s are not mounted",getRequest.Name)}
 	}
-	logger.Info("nfs-volume-path-not-found",lager.Data{"volume_name", getRequest.Name})
+	logger.Info("nfs-volume-path-not-found",lager.Data{"volume_name": getRequest.Name})
 	return voldriver.PathResponse{Err: fmt.Sprintf("Volume %s are not found",getRequest.Name)}
 }
 
@@ -198,7 +198,7 @@ func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountReq
 	tryTimes := 0
 	retry:
 	if err := d.invokeNFS(logger, cmdArgs); err !=  nil {
-		logger.Error("Error mounting volume, trying mount " + tryTimes + " times", err)
+		logger.Error("Error mounting volume, trying mount " + string(tryTimes) + " times", err)
 		time.Sleep(time.Second)
 		tryTimes++
 		if tryTimes == 3 {
@@ -221,7 +221,7 @@ func (d *LocalDriver) Unmount(logger lager.Logger, unmountRequest voldriver.Unmo
 
 	if volume, ok = d.volumes[unmountRequest.Name]; !ok {
 		logger.Info("unmount-volume-not-found",lager.Data{"volume_name": unmountRequest.Name})
-		return voldriver.MountResponse{Err: fmt.Sprintf("Volume '%s' not found", unmountRequest.Name)}
+		return voldriver.ErrorResponse{Err: fmt.Sprintf("Volume '%s' not found", unmountRequest.Name)}
 	}
 	if volume.MountCount == 0 {
 		logger.Info("unmount-volume-not-mounted", lager.Data{"volume_name": unmountRequest.Name})
@@ -269,7 +269,7 @@ func (d *LocalDriver) Remove(logger lager.Logger, removeRequest voldriver.Remove
 	var exists       bool
 
 	if volume, exists = d.volumes[removeRequest.Name]; !exists {
-		logger.Error("failed-volume-remove", lager.Data{"volume_name": removeRequest.Name})
+		logger.Error("failed-volume-remove", fmt.Errorf(fmt.Sprintf("Volume %s not found", removeRequest.Name)))
 		return voldriver.ErrorResponse{fmt.Sprintf("volume '%s' not found", removeRequest.Name)}
 	}
 
@@ -283,6 +283,13 @@ func (d *LocalDriver) Remove(logger lager.Logger, removeRequest voldriver.Remove
 	logger.Info("removing-volume", lager.Data{"volume_name": removeRequest.Name})
 	delete(d.volumes, removeRequest.Name)
 	return voldriver.ErrorResponse{}
+}
+
+func (d *LocalDriver) Activate(logger lager.Logger) voldriver.ActivateResponse {
+
+	return voldriver.ActivateResponse{
+		Implements: []string{"VolumeDriver"},
+	}
 }
 
 func (d *LocalDriver) invokeNFS(logger lager.Logger, args []string) error {
