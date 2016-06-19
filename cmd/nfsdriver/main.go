@@ -15,7 +15,7 @@ import (
 
 func parseConfig(config *nfsserver.DriverServerConfig) {
 	flag.StringVar(&config.AtAddress,"atAddress","0.0.0.0:5566","host:port nfsdriver manager listen address")
-	flag.StringVar(&config.DriversPath, "driversPath", "d:\\", "nfs driver path where the voldriver installed")
+	flag.StringVar(&config.DriversPath, "driversPath", "/tmp/voldriver", "nfs driver path where the voldriver installed")
 	flag.StringVar(&config.Transport, "transport", "tcp", "tcp or unix transport protocol,default tcp")
 
 	cf_lager.AddFlags(flag.CommandLine)
@@ -30,7 +30,7 @@ func main() {
 	nfsConfig := nfsserver.DriverServerConfig{}
 	parseConfig(&nfsConfig)
 
-	logger, reconfigurableSink := cf_lager.New("local-driver-server")
+	logger, reconfigurableSink := cf_lager.New("nfs-driver-server")
 
 	nfsServer := nfsserver.NewNfsDriverServer(nfsConfig)
 	nfsDriverServer, err := nfsServer.Runner(logger)
@@ -40,8 +40,8 @@ func main() {
 		{"nfsdriver-server", nfsDriverServer},
 	}
 
-	if degug := cf_debug_server.DebugAddress(flag.CommandLine); degug != "" {
-		servers = append(grouper.Members{{"nfsdriver-debug-server", cf_debug_server.Runner(degug, reconfigurableSink)}}, servers...)
+	if degugAddr := cf_debug_server.DebugAddress(flag.CommandLine); degugAddr != "" {
+		servers = append(grouper.Members{{"nfs-debug-server", cf_debug_server.Runner(degugAddr, reconfigurableSink)}}, servers...)
 	}
 
 	runner := sigmon.New(grouper.NewOrdered(os.Interrupt,servers))
