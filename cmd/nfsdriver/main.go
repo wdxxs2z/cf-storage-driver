@@ -30,7 +30,7 @@ func main() {
 	nfsConfig := nfsserver.DriverServerConfig{}
 	parseConfig(&nfsConfig)
 
-	logger := lager.NewLogger("nfs-driver-manager")
+	logger, reconfigurableSink := cf_lager.New("local-driver-server")
 
 	nfsServer := nfsserver.NewNfsDriverServer(nfsConfig)
 	nfsDriverServer, err := nfsServer.Runner(logger)
@@ -40,13 +40,13 @@ func main() {
 		{"nfsdriver-server", nfsDriverServer},
 	}
 
-	var log *lager.ReconfigurableSink
 	if degug := cf_debug_server.DebugAddress(flag.CommandLine); degug != "" {
-		servers = append(grouper.Members{{"nfsdriver-debug-server", cf_debug_server.Runner(degug, log)}}, servers...)
+		servers = append(grouper.Members{{"nfsdriver-debug-server", cf_debug_server.Runner(degug, reconfigurableSink)}}, servers...)
 	}
 
 	runner := sigmon.New(grouper.NewOrdered(os.Interrupt,servers))
 	process := ifrit.Invoke(runner)
+	logger.Info("started")
 	untilTerminated(logger, process)
 
 }
