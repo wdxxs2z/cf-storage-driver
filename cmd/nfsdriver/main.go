@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"../../nfsserver"
+	"github.com/wdxxs2z/nfsdriver-init/nfsserver"
 	"github.com/cloudfoundry-incubator/cf-lager"
 	"github.com/cloudfoundry/gorouter/Godeps/_workspace/src/github.com/cloudfoundry-incubator/cf-debug-server"
 	"github.com/pivotal-golang/lager"

@@ -241,7 +241,7 @@ func (d *LocalDriver) unmount(logger lager.Logger, volume *volumeMetadata, volum
 	}
 
 	cmdArgs := []string{volume.LocalMountPoint}
-	if err := d.userInvoker.Invoke(logger, "unmount", cmdArgs); err != nil {
+	if err := d.userInvoker.Invoke(logger, "umount", cmdArgs); err != nil {
 		logger.Error("Error invoking unmount cli", err)
 		return voldriver.ErrorResponse{Err: fmt.Sprintf("Error unmount '%s' (%s)",volumeName, err.Error())}
 	}

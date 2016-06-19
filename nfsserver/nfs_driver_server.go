@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"github.com/cloudfoundry-incubator/volman/voldriver/driverhttp"
 	"github.com/tedsuo/ifrit/http_server"
-	"../nfslocal"
+	"github.com/wdxxs2z/nfsdriver-init/nfslocal"
 )
 
 type DriverServerConfig struct {
