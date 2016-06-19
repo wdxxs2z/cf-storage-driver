@@ -4,12 +4,13 @@ import (
 	"flag"
 	"github.com/wdxxs2z/nfsdriver-init/nfsserver"
 	"github.com/cloudfoundry-incubator/cf-lager"
-	"github.com/cloudfoundry/gorouter/Godeps/_workspace/src/github.com/cloudfoundry-incubator/cf-debug-server"
+	"github.com/cloudfoundry-incubator/cf-debug-server"
 	"github.com/pivotal-golang/lager"
 	"github.com/tedsuo/ifrit/grouper"
-	"github.com/cloudfoundry/gorouter/Godeps/_workspace/src/github.com/tedsuo/ifrit/sigmon"
+	"github.com/tedsuo/ifrit/sigmon"
+	"github.com/tedsuo/ifrit"
 	"os"
-	"github.com/cloudfoundry/gorouter/Godeps/_workspace/src/github.com/tedsuo/ifrit"
+
 )
 
 func parseConfig(config *nfsserver.DriverServerConfig) {
@@ -39,9 +40,9 @@ func main() {
 		{"nfsdriver-server", nfsDriverServer},
 	}
 
-	//var log *lager.ReconfigurableSink
+	var log *lager.ReconfigurableSink
 	if degug := cf_debug_server.DebugAddress(flag.CommandLine); degug != "" {
-		servers = append(grouper.Members{{"nfsdriver-debug-server", cf_debug_server.Runner(degug)}}, servers...)
+		servers = append(grouper.Members{{"nfsdriver-debug-server", cf_debug_server.Runner(degug, log)}}, servers...)
 	}
 
 	runner := sigmon.New(grouper.NewOrdered(os.Interrupt,servers))
