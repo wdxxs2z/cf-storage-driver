@@ -192,7 +192,7 @@ func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountReq
 	case 4.1:
 		cmdArgs = []string{"-t", "nfs4" , volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint, "-o", "vers=4,minorversion=1"}
 	default:
-		cmdArgs = []string{"-t", "nfs4" , volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		cmdArgs = []string{"-o", "nolock", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 	}
 
 	tryTimes := 0
