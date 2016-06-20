@@ -10,10 +10,10 @@ import (
 	"github.com/tedsuo/ifrit/sigmon"
 	"github.com/tedsuo/ifrit"
 	"os"
-
 )
 
 func parseConfig(config *nfsserver.DriverServerConfig) {
+
 	flag.StringVar(&config.AtAddress,"atAddress","0.0.0.0:5566","host:port nfsdriver manager listen address")
 	flag.StringVar(&config.DriversPath, "driversPath", "/tmp/voldriver", "nfs driver path where the voldriver installed")
 	flag.StringVar(&config.Transport, "transport", "tcp", "tcp or unix transport protocol,default tcp")
