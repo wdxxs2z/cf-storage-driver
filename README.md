@@ -1,4 +1,18 @@
 # nfsdriver-init
+### Run It
+Run voldriver
+```
+sudo voldriver -volmanDriverPaths /tmp/voldriver
+```
+Run Nfsdriver-init
+```
+sudo ./nfsdriver -driversPath /tmp/voldriver
+```
+More /tmp/voldriver/nfsdriver.json
+```
+{"Name":"nfsdriver","Addr":"http://0.0.0.0:5566","TLSConfig":null}
+```
+### Http Rest Client Test
 Get http://{voldriverAddr}:8750/drivers
 ```
 {"drivers": [{"name": "nfsdriver"}]}
@@ -16,5 +30,5 @@ Post http://{voldriverAddr}:8750/drivers/unmount
 {"driverId":"nfsdriver","volumeId":"/tmp/docker","config": {localmountpoint":"/tmp/docker"}}
 ```
 
-#### Can't resolved
-Only use sudo (root)
+#### Can't resolved - important
+Only use sudo (root) otherwise cause some permission errors.
