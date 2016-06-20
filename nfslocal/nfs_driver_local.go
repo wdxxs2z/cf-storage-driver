@@ -25,6 +25,7 @@ type volumeMetadata struct {
 	RemoteMountPoint string
 	LocalMountPoint  string
 	Version          float32
+	Opts             string
 	MountCount       int
 }
 
@@ -51,6 +52,8 @@ func (d *LocalDriver) Create(logger lager.Logger, createRequest voldriver.Create
 		localmountpoint  string
 		remotemountpoint string
 		remoteinfo       string
+		opts             string
+		version          float32
 		err              *voldriver.ErrorResponse
 	)
 
@@ -66,10 +69,18 @@ func (d *LocalDriver) Create(logger lager.Logger, createRequest voldriver.Create
 	if err != nil {
 		return *err
 	}
-	return d.create(logger, createRequest.Name, remoteinfo, remotemountpoint, localmountpoint)
+	opts, err = extractValue(logger, "opts", createRequest.Opts)
+	if err != nil {
+		return *err
+	}
+	version, err = extractValue(logger, "version", createRequest.Opts)
+	if err != nil {
+		return *err
+	}
+	return d.create(logger, createRequest.Name, remoteinfo, remotemountpoint, localmountpoint, version, opts)
 }
 
-func (d *LocalDriver) create(logger lager.Logger, name, remoteinfo, remotemountpoint, localmountpoint  string) voldriver.ErrorResponse {
+func (d *LocalDriver) create(logger lager.Logger, name, remoteinfo, remotemountpoint, localmountpoint  string, version float32, opts string) voldriver.ErrorResponse {
 	var volume *volumeMetadata
 	var ok     bool
 
@@ -77,6 +88,8 @@ func (d *LocalDriver) create(logger lager.Logger, name, remoteinfo, remotemountp
 		RemoteInfo:          remoteinfo,
 		RemoteMountPoint:    remotemountpoint,
 		LocalMountPoint:     localmountpoint,
+		Version:             version,
+		Opts:                opts,
 	}
 
 	if volume, ok = d.volumes[name]; !ok {
@@ -187,12 +200,24 @@ func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountReq
 	//Judgement the nfs version
 	var cmdArgs []string
 	switch volume.Version {
-	case 3:
-		cmdArgs = []string{"-t", "nfs" , volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint, "-o", "port=2049,nolock,proto=tcp"}
+	case 3.0:
+		if len(volume.Opts < 0) {
+			cmdArgs = []string{"-t", "nfs", "-o", "port=2049,nolock,proto=tcp", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		} else {
+			cmdArgs = []string{"-t", "nfs", "-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		}
 	case 4.1:
-		cmdArgs = []string{"-t", "nfs4" , volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint, "-o", "vers=4,minorversion=1"}
+		if len(volume.Opts < 0) {
+			cmdArgs = []string{"-t", "nfs4" , "-o", "vers=4,minorversion=1", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		} else {
+			cmdArgs = []string{"-t", "nfs4" , "-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		}
 	default:
-		cmdArgs = []string{"-o", "nolock", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		if len(volume.Opts) < 0 {
+			cmdArgs = []string{"-o", "nolock", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		} else {
+			cmdArgs = []string{"-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+		}
 	}
 
 	tryTimes := 0
