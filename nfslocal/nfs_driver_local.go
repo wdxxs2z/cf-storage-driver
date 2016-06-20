@@ -73,10 +73,6 @@ func (d *LocalDriver) Create(logger lager.Logger, createRequest voldriver.Create
 	if err != nil {
 		return *err
 	}
-	version, err = extractValue(logger, "version", createRequest.Opts)
-	if err != nil {
-		return *err
-	}
 	return d.create(logger, createRequest.Name, remoteinfo, remotemountpoint, localmountpoint, version, opts)
 }
 
@@ -201,19 +197,19 @@ func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountReq
 	var cmdArgs []string
 	switch volume.Version {
 	case 3.0:
-		if len(volume.Opts < 0) {
+		if len(volume.Opts) < 1 {
 			cmdArgs = []string{"-t", "nfs", "-o", "port=2049,nolock,proto=tcp", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 		} else {
 			cmdArgs = []string{"-t", "nfs", "-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 		}
 	case 4.1:
-		if len(volume.Opts < 0) {
+		if len(volume.Opts) < 1 {
 			cmdArgs = []string{"-t", "nfs4" , "-o", "vers=4,minorversion=1", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 		} else {
 			cmdArgs = []string{"-t", "nfs4" , "-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 		}
 	default:
-		if len(volume.Opts) < 0 {
+		if len(volume.Opts) < 1 {
 			cmdArgs = []string{"-o", "nolock", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 		} else {
 			cmdArgs = []string{"-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
