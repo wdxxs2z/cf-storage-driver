@@ -317,6 +317,12 @@ func (d *LocalDriver) Activate(logger lager.Logger) voldriver.ActivateResponse {
 	}
 }
 
+func (d *LocalDriver) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
+	return voldriver.CapabilitiesResponse{
+		Capabilities: voldriver.CapabilityInfo{Scope: "global"},
+	}
+}
+
 func (d *LocalDriver) invokeNFS(logger lager.Logger, args []string) error {
 	cmd := "mount"
 	return d.userInvoker.Invoke(logger, cmd, args)
