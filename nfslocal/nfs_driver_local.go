@@ -2,11 +2,13 @@ package nfslocal
 
 import (
 	"os"
-	"io/ioutil"
 
-	"github.com/pivotal-golang/lager"
-	"github.com/cloudfoundry/gunk/os_wrap/exec_wrap"
-	"github.com/cloudfoundry-incubator/volman/voldriver"
+	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/voldriver"
+	osshim "code.cloudfoundry.org/goshims/os"
+	"code.cloudfoundry.org/goshims/execshim"
+	"code.cloudfoundry.org/goshims/ioutil"
+
 	"strings"
 	"fmt"
 	"time"
@@ -17,7 +19,8 @@ type LocalDriver struct {
 	logFile          string
 	volumes          map[string]*volumeMetadata
 	userInvoker      Invoker
-	useSystemUtil    SystemUtil
+	os               osshim.Os
+	useSystemUtil    ioutilshim.Ioutil
 }
 
 type volumeMetadata struct {
@@ -30,16 +33,17 @@ type volumeMetadata struct {
 }
 
 func NewLocalDriver() *LocalDriver {
-	return NewLocalDriverWithSystemUtilAndInvoker(NewRealSystemUtil(), NewRealInvoker())
+	return NewLocalDriverWithSystemUtilAndInvoker(&ioutilshim.IoutilShim{}, &osshim.OsShim{} , NewRealInvoker())
 }
 
-func NewLocalDriverWithSystemUtilAndInvoker(systemUtil SystemUtil, invoker Invoker) *LocalDriver {
+func NewLocalDriverWithSystemUtilAndInvoker(ioutil ioutilshim.Ioutil, os osshim.Os, invoker Invoker) *LocalDriver {
 	return &LocalDriver{
 		"_nfsdriver/",
 		"/tmp/nfsdriver.log",
 		map[string]*volumeMetadata{},
 		invoker,
-		systemUtil,
+		os,
+		ioutil,
 	}
 }
 
@@ -187,7 +191,7 @@ func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountReq
 		return voldriver.MountResponse{Mountpoint:volume.LocalMountPoint}
 	}
 
-	err := d.useSystemUtil.MkdirAll(volume.LocalMountPoint, os.ModePerm)
+	err := d.os.MkdirAll(volume.LocalMountPoint, os.ModePerm)
 	if err != nil {
 		logger.Error("failed-create-mountdir",err)
 		return voldriver.MountResponse{Err: fmt.Sprintf("unable to create local mount point '%s'", mountRequest.Name)}
@@ -268,7 +272,7 @@ func (d *LocalDriver) unmount(logger lager.Logger, volume *volumeMetadata, volum
 	}
 
 	volume.MountCount = 0
-	if err := d.useSystemUtil.Remove(volume.LocalMountPoint); err != nil {
+	if err := d.os.Remove(volume.LocalMountPoint); err != nil {
 		logger.Error("Error deleting file", err)
 		return voldriver.ErrorResponse{Err: fmt.Sprintf("Error unmount '%s' (%s)",volumeName, err.Error())}
 	}
@@ -339,14 +343,14 @@ type Invoker interface {
 }
 
 type realInvoker struct {
-	exec exec_wrap.Exec
+	exec execshim.Exec
 }
 
 func NewRealInvoker() Invoker {
-	return NewRealInvokerWithExec(exec_wrap.NewExec())
+	return NewRealInvokerWithExec(&execshim.ExecShim{})
 }
 
-func NewRealInvokerWithExec(exec exec_wrap.Exec) Invoker {
+func NewRealInvokerWithExec(exec execshim.Exec) Invoker {
 	return &realInvoker{
 		exec:        exec,
 	}
@@ -374,28 +378,4 @@ func (r *realInvoker) Invoke(logger lager.Logger, executable string, args []stri
 	}
 
 	return nil
-}
-
-type SystemUtil interface {
-	MkdirAll(filename string, perm os.FileMode) error
-	WriteFile(filename string, content []byte, perm os.FileMode) error
-	Remove(filename string) error
-}
-
-type realSystemUtil struct {}
-
-func NewRealSystemUtil() SystemUtil {
-	return &realSystemUtil{}
-}
-
-func (f *realSystemUtil) MkdirAll(filename string, perm os.FileMode) error {
-	return os.MkdirAll(filename, perm)
-}
-
-func (f *realSystemUtil) WriteFile(filename string, content []byte, perm os.FileMode) error {
-	return ioutil.WriteFile(filename, content, perm)
-}
-
-func (f *realSystemUtil) Remove(filename string) error {
-	return os.RemoveAll(filename)
 }

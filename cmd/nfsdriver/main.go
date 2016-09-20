@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"github.com/wdxxs2z/nfsdriver-init/nfsserver"
-	"github.com/cloudfoundry-incubator/cf-lager"
-	"github.com/cloudfoundry-incubator/cf-debug-server"
-	"github.com/pivotal-golang/lager"
+	cf_lager "code.cloudfoundry.org/cflager"
+	cf_debug_server "code.cloudfoundry.org/debugserver"
+	"code.cloudfoundry.org/lager"
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
 	"github.com/tedsuo/ifrit"
@@ -30,24 +30,26 @@ func main() {
 	nfsConfig := nfsserver.DriverServerConfig{}
 	parseConfig(&nfsConfig)
 
-	logger, reconfigurableSink := cf_lager.New("nfs-driver-server")
+	nfsLogger, _ := cf_lager.New("nfs-driver-server")
 
 	nfsServer := nfsserver.NewNfsDriverServer(nfsConfig)
-	nfsDriverServer, err := nfsServer.Runner(logger)
-	exitOnFailure(logger, err)
+	nfsDriverServer, err := nfsServer.Runner(nfsLogger)
+	exitOnFailure(nfsLogger, err)
 
 	servers := grouper.Members{
 		{"nfsdriver-server", nfsDriverServer},
 	}
 
+	var logTap *lager.ReconfigurableSink
+
 	if degugAddr := cf_debug_server.DebugAddress(flag.CommandLine); degugAddr != "" {
-		servers = append(grouper.Members{{"nfs-debug-server", cf_debug_server.Runner(degugAddr, reconfigurableSink)}}, servers...)
+		servers = append(grouper.Members{{"nfs-debug-server", cf_debug_server.Runner(degugAddr, logTap)}}, servers...)
 	}
 
 	runner := sigmon.New(grouper.NewOrdered(os.Interrupt,servers))
 	process := ifrit.Invoke(runner)
-	logger.Info("started")
-	untilTerminated(logger, process)
+	nfsLogger.Info("started")
+	untilTerminated(nfsLogger, process)
 
 }
 

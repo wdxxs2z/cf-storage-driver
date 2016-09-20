@@ -1,13 +1,14 @@
 package nfsserver
 
 import (
-	"github.com/pivotal-golang/lager"
+	"code.cloudfoundry.org/lager"
 	"github.com/tedsuo/ifrit"
 	"strings"
-	"github.com/cloudfoundry-incubator/volman/voldriver"
+	"code.cloudfoundry.org/voldriver"
 	"fmt"
 	"encoding/json"
-	"github.com/cloudfoundry-incubator/volman/voldriver/driverhttp"
+	"code.cloudfoundry.org/voldriver/driverhttp"
+
 	"github.com/tedsuo/ifrit/http_server"
 	"github.com/wdxxs2z/nfsdriver-init/nfslocal"
 )
@@ -36,11 +37,11 @@ func (server *DriverServer) Runner(logger lager.Logger) (ifrit.Runner, error) {
 	var err error
 	var nfsDriverServer ifrit.Runner
 
-	server.config.Transport = server.determineTransport(server.config.AtAddress)
+	server.config.Transport = server.DetermineTransport(server.config.AtAddress)
 	if server.config.Transport == "tcp" {
-		nfsDriverServer, err = server.createTcpServer(logger, server.config.AtAddress, server.config.DriversPath)
+		nfsDriverServer, err = server.CreateTcpServer(logger, server.config.AtAddress, server.config.DriversPath)
 	} else {
-		nfsDriverServer, err = server.createUnixServer(logger, server.config.AtAddress, server.config.DriversPath)
+		nfsDriverServer, err = server.CreateUnixServer(logger, server.config.AtAddress, server.config.DriversPath)
 	}
 	if err != nil {
 		return nil, err
@@ -48,7 +49,7 @@ func (server *DriverServer) Runner(logger lager.Logger) (ifrit.Runner, error) {
 	return nfsDriverServer, nil
 }
 
-func (server *DriverServer) createTcpServer(logger lager.Logger, address string, driversPath string) (ifrit.Runner, error) {
+func (server *DriverServer) CreateTcpServer(logger lager.Logger, address string, driversPath string) (ifrit.Runner, error) {
 	logger.Session("create-tcp-server")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -81,7 +82,7 @@ func (server *DriverServer) rewriteAddress(address string, protocol string) stri
 	return address
 }
 
-func (server *DriverServer) createUnixServer(logger lager.Logger, address string, driversPath string) (ifrit.Runner, error) {
+func (server *DriverServer) CreateUnixServer(logger lager.Logger, address string, driversPath string) (ifrit.Runner, error) {
 	logger.Session("create-unix-server")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -100,7 +101,7 @@ func (server *DriverServer) createUnixServer(logger lager.Logger, address string
 	return http_server.NewUnixServer(address, handler), nil
 }
 
-func (server *DriverServer) determineTransport(address string) string {
+func (server *DriverServer) DetermineTransport(address string) string {
 	if strings.HasSuffix(address, ".sock") {
 		return "unix"
 	}
