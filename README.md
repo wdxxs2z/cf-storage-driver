@@ -1,10 +1,10 @@
-# nfsdriver-init
+# cf-storage-driver
 ### Run It
 Run voldriver
 ```
 sudo voldriver -volmanDriverPaths /tmp/voldriver
 ```
-Run Nfsdriver-init
+Run cf-storage-driver
 ```
 sudo ./nfsdriver -driversPath /tmp/voldriver
 ```
