@@ -10,8 +10,7 @@ import (
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
 	"github.com/tedsuo/ifrit"
-	"github.com/wdxxs2z/nfsdriver-init/storage_server"
-
+	"github.com/wdxxs2z/cf-storage-driver/storage_server"
 )
 
 func parseConfig(config *nfsserver.DriverServerConfig) {
