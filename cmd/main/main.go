@@ -10,14 +10,16 @@ import (
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
 	"github.com/tedsuo/ifrit"
-	"github.com/wdxxs2z/cf-storage-driver/storage_server"
+	//"github.com/wdxxs2z/cf-storage-driver/storage_server"
+	"../../storage_server"
 )
 
-func parseConfig(config *nfsserver.DriverServerConfig) {
+func parseConfig(config *storage_server.DriverServerConfig) {
 
-	flag.StringVar(&config.AtAddress,"atAddress","0.0.0.0:5566","host:port nfsdriver manager listen address")
+	flag.StringVar(&config.ListenAddress,"listenAddress","0.0.0.0:5566","host:port nfsdriver manager listen address")
 	flag.StringVar(&config.DriversPath, "driversPath", "/tmp/voldriver", "nfs driver path where the voldriver installed")
 	flag.StringVar(&config.Transport, "transport", "tcp", "tcp or unix transport protocol,default tcp")
+	flag.StringVar(&config.RegistryDriver, "registryDriver", "nfs", "support storage backend driver,now available drivers are nfs,local...")
 
 	cf_lager.AddFlags(flag.CommandLine)
 	cf_debug_server.AddFlags(flag.CommandLine)
@@ -28,29 +30,32 @@ func parseConfig(config *nfsserver.DriverServerConfig) {
 func init() {}
 
 func main() {
-	nfsConfig := nfsserver.DriverServerConfig{}
-	parseConfig(&nfsConfig)
+	storageConfig := storage_server.DriverServerConfig{}
 
-	nfsLogger, _ := cf_lager.New("nfs-driver-server")
+	parseConfig(&storageConfig)
 
-	nfsServer := nfsserver.NewNfsDriverServer(nfsConfig)
-	nfsDriverServer, err := nfsServer.Runner(nfsLogger)
-	exitOnFailure(nfsLogger, err)
+	storageLogger, _ := cf_lager.New("storage-driver-server")
+
+	storageServer := storage_server.NewStorageDriverServer(storageConfig)
+
+	storageDriverServer, err := storageServer.Runner(storageLogger)
+
+	exitOnFailure(storageLogger, err)
 
 	servers := grouper.Members{
-		{"nfsdriver-server", nfsDriverServer},
+		{"storage-driver-server", storageDriverServer},
 	}
 
 	var logTap *lager.ReconfigurableSink
 
 	if degugAddr := cf_debug_server.DebugAddress(flag.CommandLine); degugAddr != "" {
-		servers = append(grouper.Members{{"nfs-debug-server", cf_debug_server.Runner(degugAddr, logTap)}}, servers...)
+		servers = append(grouper.Members{{"storage-driver-debug-server", cf_debug_server.Runner(degugAddr, logTap)}}, servers...)
 	}
 
 	runner := sigmon.New(grouper.NewOrdered(os.Interrupt,servers))
 	process := ifrit.Invoke(runner)
-	nfsLogger.Info("started")
-	untilTerminated(nfsLogger, process)
+	storageLogger.Info("started")
+	untilTerminated(storageLogger, process)
 
 }
 

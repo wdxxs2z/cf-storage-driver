@@ -1,4 +1,4 @@
-package nfslocal
+package storage_nfsdriver
 
 import (
 	"os"
@@ -14,7 +14,11 @@ import (
 	"time"
 )
 
-type LocalDriver struct {
+const (
+	Name = "nfs"
+)
+
+type NfsLocalDriver struct {
 	rootDir          string
 	logFile          string
 	volumes          map[string]*volumeMetadata
@@ -32,12 +36,12 @@ type volumeMetadata struct {
 	MountCount       int
 }
 
-func NewLocalDriver() *LocalDriver {
+func NewNfsLocalDriver() *NfsLocalDriver {
 	return NewLocalDriverWithSystemUtilAndInvoker(&ioutilshim.IoutilShim{}, &osshim.OsShim{} , NewRealInvoker())
 }
 
-func NewLocalDriverWithSystemUtilAndInvoker(ioutil ioutilshim.Ioutil, os osshim.Os, invoker Invoker) *LocalDriver {
-	return &LocalDriver{
+func NewLocalDriverWithSystemUtilAndInvoker(ioutil ioutilshim.Ioutil, os osshim.Os, invoker Invoker) *NfsLocalDriver {
+	return &NfsLocalDriver{
 		"_nfsdriver/",
 		"/tmp/nfsdriver.log",
 		map[string]*volumeMetadata{},
@@ -47,7 +51,7 @@ func NewLocalDriverWithSystemUtilAndInvoker(ioutil ioutilshim.Ioutil, os osshim.
 	}
 }
 
-func (d *LocalDriver) Create(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
+func (d *NfsLocalDriver) Create(logger lager.Logger, createRequest voldriver.CreateRequest) voldriver.ErrorResponse {
 	logger = logger.Session("create", lager.Data{"request": createRequest})
 	logger.Info("start")
 	defer logger.Info("end")
@@ -80,7 +84,7 @@ func (d *LocalDriver) Create(logger lager.Logger, createRequest voldriver.Create
 	return d.create(logger, createRequest.Name, remoteinfo, remotemountpoint, localmountpoint, version, opts)
 }
 
-func (d *LocalDriver) create(logger lager.Logger, name, remoteinfo, remotemountpoint, localmountpoint  string, version float32, opts string) voldriver.ErrorResponse {
+func (d *NfsLocalDriver) create(logger lager.Logger, name, remoteinfo, remotemountpoint, localmountpoint  string, version float32, opts string) voldriver.ErrorResponse {
 	var volume *volumeMetadata
 	var ok     bool
 
@@ -115,7 +119,7 @@ func successfulResponse() voldriver.ErrorResponse {
 	return voldriver.ErrorResponse{}
 }
 
-func (d *LocalDriver) Get(logger lager.Logger, getRequest voldriver.GetRequest) voldriver.GetResponse {
+func (d *NfsLocalDriver) Get(logger lager.Logger, getRequest voldriver.GetRequest) voldriver.GetResponse {
 	logger.Session("Get")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -134,7 +138,7 @@ func (d *LocalDriver) Get(logger lager.Logger, getRequest voldriver.GetRequest) 
 	return voldriver.GetResponse{Err: fmt.Sprintf("Volume %s not found", getRequest.Name)}
 }
 
-func (d *LocalDriver) Path(logger lager.Logger, getRequest voldriver.PathRequest) voldriver.PathResponse {
+func (d *NfsLocalDriver) Path(logger lager.Logger, getRequest voldriver.PathRequest) voldriver.PathResponse {
 	logger.Session("Path")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -151,7 +155,7 @@ func (d *LocalDriver) Path(logger lager.Logger, getRequest voldriver.PathRequest
 	return voldriver.PathResponse{Err: fmt.Sprintf("Volume %s are not found",getRequest.Name)}
 }
 
-func (d *LocalDriver) List(logger lager.Logger) voldriver.ListResponse {
+func (d *NfsLocalDriver) List(logger lager.Logger) voldriver.ListResponse {
 	logger.Session("List")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -172,7 +176,7 @@ func (d *LocalDriver) List(logger lager.Logger) voldriver.ListResponse {
 	return listResponse
 }
 
-func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse {
+func (d *NfsLocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountRequest) voldriver.MountResponse {
 	logger.Session("Mount")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -236,7 +240,7 @@ func (d *LocalDriver) Mount(logger lager.Logger, mountRequest voldriver.MountReq
 	return voldriver.MountResponse{Mountpoint: volume.LocalMountPoint}
 }
 
-func (d *LocalDriver) Unmount(logger lager.Logger, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse  {
+func (d *NfsLocalDriver) Unmount(logger lager.Logger, unmountRequest voldriver.UnmountRequest) voldriver.ErrorResponse  {
 	logger.Session("unmount")
 	logger.Info("start")
 	defer logger.Info("end")
@@ -256,7 +260,7 @@ func (d *LocalDriver) Unmount(logger lager.Logger, unmountRequest voldriver.Unmo
 	return d.unmount(logger, volume, unmountRequest.Name)
 }
 
-func (d *LocalDriver) unmount(logger lager.Logger, volume *volumeMetadata, volumeName string) voldriver.ErrorResponse {
+func (d *NfsLocalDriver) unmount(logger lager.Logger, volume *volumeMetadata, volumeName string) voldriver.ErrorResponse {
 	logger.Info("umount-found-volume", lager.Data{"metadata": volume})
 
 	if volume.MountCount > 1 {
@@ -280,7 +284,7 @@ func (d *LocalDriver) unmount(logger lager.Logger, volume *volumeMetadata, volum
 	return voldriver.ErrorResponse{}
 }
 
-func (d *LocalDriver) Remove(logger lager.Logger, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
+func (d *NfsLocalDriver) Remove(logger lager.Logger, removeRequest voldriver.RemoveRequest) voldriver.ErrorResponse {
 	logger.Session("remove", lager.Data{"volume": removeRequest})
 	logger.Info("start")
 	defer logger.Info("end")
@@ -310,20 +314,20 @@ func (d *LocalDriver) Remove(logger lager.Logger, removeRequest voldriver.Remove
 	return voldriver.ErrorResponse{}
 }
 
-func (d *LocalDriver) Activate(logger lager.Logger) voldriver.ActivateResponse {
+func (d *NfsLocalDriver) Activate(logger lager.Logger) voldriver.ActivateResponse {
 
 	return voldriver.ActivateResponse{
 		Implements: []string{"VolumeDriver"},
 	}
 }
 
-func (d *LocalDriver) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
+func (d *NfsLocalDriver) Capabilities(logger lager.Logger) voldriver.CapabilitiesResponse {
 	return voldriver.CapabilitiesResponse{
 		Capabilities: voldriver.CapabilityInfo{Scope: "global"},
 	}
 }
 
-func (d *LocalDriver) invokeNFS(logger lager.Logger, args []string) error {
+func (d *NfsLocalDriver) invokeNFS(logger lager.Logger, args []string) error {
 	cmd := "mount"
 	return d.userInvoker.Invoke(logger, cmd, args)
 }
