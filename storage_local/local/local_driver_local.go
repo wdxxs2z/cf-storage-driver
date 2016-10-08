@@ -16,7 +16,6 @@ import (
 	//"context"
 	"golang.org/x/crypto/bcrypt"
 	//"syscall"
-	"code.cloudfoundry.org/goshims/execshim"
 )
 
 const VolumesRootDir = "_volumes"
@@ -33,20 +32,18 @@ type LocalDriver struct {
 	os            osshim.Os
 	filepath      filepathshim.Filepath
 	mountPathRoot string
-	userInvoker      Invoker
 }
 
-func NewLocalDriver(devicePath string) *LocalDriver {
-	return NewLocalDriverInvoker(&osshim.OsShim{}, &filepathshim.FilepathShim{}, devicePath, NewRealInvoker())
+func NewLocalDriver(mountDir string) *LocalDriver {
+	return WrapLocalDriver(&osshim.OsShim{}, &filepathshim.FilepathShim{}, mountDir)
 }
 
-func NewLocalDriverInvoker(os osshim.Os, filepath filepathshim.Filepath, mountPathRoot string, invoker Invoker) *LocalDriver {
+func WrapLocalDriver(os osshim.Os, filepath filepathshim.Filepath, mountPathRoot string) *LocalDriver {
 	return &LocalDriver{
 		volumes:       map[string]*LocalVolumeInfo{},
 		os:            os,
 		filepath:      filepath,
 		mountPathRoot: mountPathRoot,
-		userInvoker:   invoker,
 	}
 }
 
@@ -351,51 +348,4 @@ func (d *LocalDriver) unmount(logger lager.Logger, name string, mountPath string
 	d.volumes[name].Mountpoint = ""
 
 	return voldriver.ErrorResponse{}
-}
-
-func (d *LocalDriver) invokeLocal(logger lager.Logger, args []string) error {
-	cmd := "mount"
-	return d.userInvoker.Invoke(logger, cmd, args)
-}
-
-type Invoker interface {
-	Invoke(logger lager.Logger, executable string, args []string) error
-}
-
-type realInvoker struct {
-	exec execshim.Exec
-}
-
-func NewRealInvoker() Invoker {
-	return NewRealInvokerWithExec(&execshim.ExecShim{})
-}
-
-func NewRealInvokerWithExec(exec execshim.Exec) Invoker {
-	return &realInvoker{
-		exec:        exec,
-	}
-}
-
-func (r *realInvoker) Invoke(logger lager.Logger, executable string, args []string) error {
-	cmdHandle := r.exec.Command(executable, args...)
-
-	_,err := cmdHandle.StdoutPipe()
-	if err != nil {
-		logger.Error("unable to get stdout", err)
-		return err
-	}
-
-	err = cmdHandle.Start()
-	if err != nil {
-		logger.Error("start command error", err)
-		return err
-	}
-
-	err = cmdHandle.Wait()
-	if err != nil {
-		logger.Error("wait command error", err)
-		return err
-	}
-
-	return nil
 }

@@ -22,6 +22,7 @@ type DriverServerConfig struct {
 	DriversPath      string
 	Transport        string
 	RegistryDriver   string
+	MountDir         string
 }
 
 type DriverServer struct  {
@@ -67,7 +68,7 @@ func (server *DriverServer) CreateTcpServer(logger lager.Logger, address string,
 	case "nfs":
 		handler,err = server.createHttpHandler(logger, address, driverName, driversPath, "tcp", storage_nfsdriver.NewNfsLocalDriver())
 	case "local":
-		server.createHttpHandler(logger, address, driverName, driversPath, "tcp", storage_localdriver.NewLocalDriver(server.config.DriversPath))
+		server.createHttpHandler(logger, address, driverName, driversPath, "tcp", storage_localdriver.NewLocalDriver(server.config.MountDir))
 	}
 
 	if err != nil {
@@ -89,7 +90,7 @@ func (server *DriverServer) CreateUnixServer(logger lager.Logger, address string
 	case "nfs":
 		handler,err = server.createHttpHandler(logger, address, driverName, driversPath, "unix",storage_nfsdriver.NewNfsLocalDriver())
 	case "local":
-		server.createHttpHandler(logger, address, driverName, driversPath, "unix", storage_localdriver.NewLocalDriver(server.config.DriversPath))
+		server.createHttpHandler(logger, address, driverName, driversPath, "unix", storage_localdriver.NewLocalDriver(server.config.MountDir))
 	}
 
 	if err != nil {
@@ -98,7 +99,7 @@ func (server *DriverServer) CreateUnixServer(logger lager.Logger, address string
 	return http_server.NewUnixServer(address, handler), nil
 }
 
-func (server *DriverServer) createHttpHandler(logger lager.Logger, address,driver,driversPath,mode string,client voldriver.Driver) (http.Handler, error){
+func (server *DriverServer) createHttpHandler(logger lager.Logger, address,driver,driversPath,mode string, client voldriver.Driver) (http.Handler, error){
 	driverName := fmt.Sprintf("%sdriver", driver)
 	logger.Session(fmt.Sprintf("create-%s-driver-spec",driver))
 	logger.Info("start")

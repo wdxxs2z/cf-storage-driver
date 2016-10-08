@@ -20,6 +20,7 @@ func parseConfig(config *storage_server.DriverServerConfig) {
 	flag.StringVar(&config.DriversPath, "driversPath", "/tmp/voldriver", "nfs driver path where the voldriver installed")
 	flag.StringVar(&config.Transport, "transport", "tcp", "tcp or unix transport protocol,default tcp")
 	flag.StringVar(&config.RegistryDriver, "registryDriver", "nfs", "support storage backend driver,now available drivers are nfs,local...")
+	flag.StringVar(&config.MountDir, "local driver only use it", "/tmp/local", "fake local mount dir")
 
 	cf_lager.AddFlags(flag.CommandLine)
 	cf_debug_server.AddFlags(flag.CommandLine)
