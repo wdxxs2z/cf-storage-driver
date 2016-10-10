@@ -210,11 +210,11 @@ func (d *NfsLocalDriver) Mount(logger lager.Logger, mountRequest voldriver.Mount
 		} else {
 			cmdArgs = []string{"-t", "nfs", "-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
 		}
-	case 4.1:
+	case 4.1,4.0:
 		if len(volume.Opts) < 1 {
-			cmdArgs = []string{"-t", "nfs4" , "-o", "vers=4,minorversion=1", volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+			cmdArgs = []string{"-t", "nfs4" , "-o", "vers=4,minorversion=1", volume.RemoteInfo + ":" + "/", volume.LocalMountPoint}
 		} else {
-			cmdArgs = []string{"-t", "nfs4" , "-o", volume.Opts, volume.RemoteInfo + ":" + volume.RemoteMountPoint, volume.LocalMountPoint}
+			cmdArgs = []string{"-t", "nfs4" , "-o", volume.Opts, volume.RemoteInfo + ":" + "/", volume.LocalMountPoint}
 		}
 	default:
 		if len(volume.Opts) < 1 {
