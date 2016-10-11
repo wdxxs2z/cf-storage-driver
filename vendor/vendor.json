@@ -1,0 +1,139 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "y1F6JVA6bRFpRfQYCkP2B/qiN4E=",
+			"path": "code.cloudfoundry.org/cfhttp",
+			"revision": "1d363866d79a7203ee22ee605a9ac6081b56c9a0",
+			"revisionTime": "2016-08-23T17:27:19Z"
+		},
+		{
+			"checksumSHA1": "iDPGD7DVtsTSpxcdjyPAGJjnIF0=",
+			"path": "code.cloudfoundry.org/cfhttp/handlers",
+			"revision": "1d363866d79a7203ee22ee605a9ac6081b56c9a0",
+			"revisionTime": "2016-08-23T17:27:19Z"
+		},
+		{
+			"checksumSHA1": "krD3LB2zSrVMmeVUHuLf4ssL+Jg=",
+			"path": "code.cloudfoundry.org/cfhttp/unix_transport",
+			"revision": "1d363866d79a7203ee22ee605a9ac6081b56c9a0",
+			"revisionTime": "2016-08-23T17:27:19Z"
+		},
+		{
+			"checksumSHA1": "i+wLh3Fgroe9wjVN+5khbrS5BtE=",
+			"path": "code.cloudfoundry.org/cflager",
+			"revision": "3b0406dd8038bb31452dfaf171c4f0efa55393bf",
+			"revisionTime": "2016-07-05T18:54:20Z"
+		},
+		{
+			"checksumSHA1": "eD7Sw6kF9s4UIX5PnYdE884fqvo=",
+			"path": "code.cloudfoundry.org/clock",
+			"revision": "e0835a7d46f9ea781e764f0dc9325110e32a97dd",
+			"revisionTime": "2016-07-26T17:46:41Z"
+		},
+		{
+			"checksumSHA1": "UvNx3y0U80ofuXokfQRsFeRwkDU=",
+			"path": "code.cloudfoundry.org/debugserver",
+			"revision": "5b9c0046a5486d8ee9d8704001c2dc7d5c3b9076",
+			"revisionTime": "2016-06-30T21:51:24Z"
+		},
+		{
+			"checksumSHA1": "WsURK1eTit0KMpKpqtK/ohwI9JY=",
+			"path": "code.cloudfoundry.org/goshims/execshim",
+			"revision": "cd7fc38c1c89a63a45f686f4694adbd318986993",
+			"revisionTime": "2016-09-14T19:02:31Z"
+		},
+		{
+			"checksumSHA1": "+KZvuW6MHMucBLfchObe86Nk7rw=",
+			"path": "code.cloudfoundry.org/goshims/filepath",
+			"revision": "cd7fc38c1c89a63a45f686f4694adbd318986993",
+			"revisionTime": "2016-09-14T19:02:31Z"
+		},
+		{
+			"checksumSHA1": "mRKILjv9BE2YFkBLu7GkHRk7y4Q=",
+			"path": "code.cloudfoundry.org/goshims/http_wrap",
+			"revision": "cd7fc38c1c89a63a45f686f4694adbd318986993",
+			"revisionTime": "2016-09-14T19:02:31Z"
+		},
+		{
+			"checksumSHA1": "z+QwcZ5xn060tEQimgUzhiHV6Hw=",
+			"path": "code.cloudfoundry.org/goshims/ioutil",
+			"revision": "cd7fc38c1c89a63a45f686f4694adbd318986993",
+			"revisionTime": "2016-09-14T19:02:31Z"
+		},
+		{
+			"checksumSHA1": "EkE8k9UP0jO1Jh2vJE1AQFpbP+I=",
+			"path": "code.cloudfoundry.org/goshims/os",
+			"revision": "cd7fc38c1c89a63a45f686f4694adbd318986993",
+			"revisionTime": "2016-09-14T19:02:31Z"
+		},
+		{
+			"checksumSHA1": "kPaJQ5SuGrBrXdMQG3PAS0XO238=",
+			"path": "code.cloudfoundry.org/lager",
+			"revision": "62951a8009ab331bb21dc418074fa54e66eb9b6a",
+			"revisionTime": "2016-07-05T18:53:22Z"
+		},
+		{
+			"checksumSHA1": "idGmNDiZbsNcs4/CVPrArJ+9oso=",
+			"path": "code.cloudfoundry.org/voldriver",
+			"revision": "40a167cac71183488be06caf1903ffab27a99107",
+			"revisionTime": "2016-09-16T18:56:03Z"
+		},
+		{
+			"checksumSHA1": "6f9qbutOQxl3/hsGNEtjhXlhiaw=",
+			"path": "code.cloudfoundry.org/voldriver/driverhttp",
+			"revision": "40a167cac71183488be06caf1903ffab27a99107",
+			"revisionTime": "2016-09-16T18:56:03Z"
+		},
+		{
+			"checksumSHA1": "RpygQqiIp4bZVRP8jMmRu0A6C68=",
+			"path": "github.com/bmizerany/pat",
+			"revision": "b8a35001b773c267eb260a691f4e5499a3531600",
+			"revisionTime": "2014-06-25T23:47:03Z"
+		},
+		{
+			"checksumSHA1": "4HQVWoFVApZOOR+SzJQdaF6cKk8=",
+			"path": "github.com/tedsuo/ifrit",
+			"revision": "dc9cce059aa32c53806fc6b4382b5d62751df0ce",
+			"revisionTime": "2016-03-15T18:25:17Z"
+		},
+		{
+			"checksumSHA1": "ovgaeqP+w0GXCspA66Ye/GTp4i8=",
+			"path": "github.com/tedsuo/ifrit/grouper",
+			"revision": "dc9cce059aa32c53806fc6b4382b5d62751df0ce",
+			"revisionTime": "2016-03-15T18:25:17Z"
+		},
+		{
+			"checksumSHA1": "uh67vtJ7DFNUmzVgdesXmW36OlY=",
+			"path": "github.com/tedsuo/ifrit/http_server",
+			"revision": "dc9cce059aa32c53806fc6b4382b5d62751df0ce",
+			"revisionTime": "2016-03-15T18:25:17Z"
+		},
+		{
+			"checksumSHA1": "uwZVDyfbAKvtSG5E6Jem4fHnMaY=",
+			"path": "github.com/tedsuo/ifrit/sigmon",
+			"revision": "dc9cce059aa32c53806fc6b4382b5d62751df0ce",
+			"revisionTime": "2016-03-15T18:25:17Z"
+		},
+		{
+			"checksumSHA1": "f6gF1Ff17Zpw8ZcQTJv0Ttt1u2o=",
+			"path": "github.com/tedsuo/rata",
+			"revision": "b15ebd8bd97ae9202eb00c076d59b2f2824bce37",
+			"revisionTime": "2015-02-02T17:43:35Z"
+		},
+		{
+			"checksumSHA1": "vE43s37+4CJ2CDU6TlOUOYE0K9c=",
+			"path": "golang.org/x/crypto/bcrypt",
+			"revision": "c84e1f8e3a7e322d497cd16c0e8a13c7e127baf3",
+			"revisionTime": "2015-04-22T11:17:00Z"
+		},
+		{
+			"checksumSHA1": "udD2DzUPFZbMVXP0VNADhef4zKk=",
+			"path": "golang.org/x/crypto/blowfish",
+			"revision": "c84e1f8e3a7e322d497cd16c0e8a13c7e127baf3",
+			"revisionTime": "2015-04-22T11:17:00Z"
+		}
+	],
+	"rootPath": "github.com/wdxxs2z/cf-storage-driver"
+}
